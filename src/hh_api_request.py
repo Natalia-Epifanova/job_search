@@ -54,14 +54,23 @@ class HeadHunterAPI:
             print(f"Ошибка при получении информации о работодателе: {response.status_code}")
             return None
 
-    def get_employer_vacancies(self) -> Any:
-        """Функция для получения вакансий работодателя по его id"""
-        response = requests.get(self.vacancies_url)
-        if response.status_code == 200:
-            return response.json().get("items", [])
-        else:
-            print(f"Ошибка при получении вакансий: {response.status_code}")
-            return []
+    def get_employer_vacancies(self) -> List[Dict[str, Any]]:
+        """Функция для получения всех вакансий работодателя по его id, с поддержкой пагинации."""
+        vacancies = []
+        page = 0
+        per_page = 30
+        while page <= 2:
+            response = requests.get(self.vacancies_url, params={"page": page, "per_page": per_page})
+            if response.status_code == 200:
+                data = response.json()
+                vacancies.extend(data.get("items", []))
+                if len(data.get("items",[])) < per_page:
+                    break
+                page += 1
+            else:
+                print(f"Ошибка при получении вакансий: {response.status_code}")
+                break
+        return vacancies
 
     def fetch_vacancies_for_employers(self, employer_names: list) -> List[Dict[str, Any]]:
         """Получает вакансии для списка работодателей по их названиям."""
