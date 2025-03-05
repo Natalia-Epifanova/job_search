@@ -11,7 +11,7 @@ def type_of_salary(vacancy: dict) -> int:
 
 def metro_description(vacancy: dict) -> str:
     """Функция обрабатывает информацию по метро"""
-    metro_str = "Метро не указано/В этом городе метро нет"  # значение по умолчанию
+    metro_str = "Метро не указано/В этом городе метро нет"
     address = vacancy.get("address")
     if address is not None:
         metro = address.get("metro")
@@ -22,17 +22,22 @@ def metro_description(vacancy: dict) -> str:
 
 def city_description(vacancy: dict) -> str:
     """Функция обрабатывает информацию по городу"""
-    city_str = "Город не указан"  # значение по умолчанию
+    city_str = "Город не указан"
     address = vacancy.get("address")
     if address is not None:
-        city_str = address.get("city", city_str)
+        city = address.get("city")
+        if city is not None:
+            city_str = city
     return city_str
 
 
 def address_description(vacancy: dict) -> str:
     """Функция обрабатывает информацию по адресу"""
-    address_str = "Адрес не указан"  # значение по умолчанию
+    address_str = "Адрес не указан"
     address = vacancy.get("address")
     if address is not None:
-        address_str = address.get("raw", address_str)
+        full_address = address.get("raw")
+        if full_address is not None:
+            address_str = full_address
     return address_str
+
