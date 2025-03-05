@@ -64,7 +64,7 @@ class HeadHunterAPI:
             if response.status_code == 200:
                 data = response.json()
                 vacancies.extend(data.get("items", []))
-                if len(data.get("items",[])) < per_page:
+                if len(data.get("items", [])) < per_page:
                     break
                 page += 1
             else:
