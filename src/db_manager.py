@@ -20,7 +20,7 @@ class DBManager:
         """Создает соединение с базой данных. Возвращает объект соединения."""
         return psycopg2.connect(dbname=self.database_name, **self.params)
 
-    def __execute_query(self, query: str, params: Any[dict, None]=None) -> Any:
+    def __execute_query(self, query: str, params=None) -> Any:
         """Общий метод для выполнения SQL-запроса"""
         with closing(self.__connect_to_db()) as conn:
             with conn.cursor() as cur:
@@ -43,10 +43,15 @@ class DBManager:
         """Метод для получения списка всех вакансий с указанием названия компании,
         названия вакансии, зарплаты и ссылки на вакансию"""
         query = """
-            SELECT companies.company_name, vacancies.vacancy_name, vacancies.salary, vacancies.description_url_hh
+            SELECT companies.company_name, vacancies.vacancy_name, 
+               CASE 
+                   WHEN vacancies.salary = 0 THEN 'Зарплата не указана' 
+                   ELSE CAST(vacancies.salary AS TEXT) 
+               END AS salary, 
+               vacancies.description_url_hh
             FROM vacancies
             INNER JOIN companies USING(company_id);
-        """
+            """
         rows = self.__execute_query(query)
         for row in rows:
             print(row)

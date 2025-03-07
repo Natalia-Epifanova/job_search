@@ -17,13 +17,13 @@ class CreateDB:
         self.database_name = database_name
         self.params = params
 
-    def __connect_to_db(self) -> Any:
+    def _connect_to_db(self) -> Any:
         """Создает соединение с базой данных. Возвращает объект соединения."""
         return psycopg2.connect(dbname=self.database_name, **self.params)
 
-    def __execute_query(self, query: str, params: Any[dict, None]=None) -> None:
+    def _execute_query(self, query: str, params=None) -> None:
         """Общий метод для выполнения SQL-запроса"""
-        with closing(self.__connect_to_db()) as conn:
+        with closing(self._connect_to_db()) as conn:
             with conn.cursor() as cur:
                 cur.execute(query, params)
                 conn.commit()
@@ -63,14 +63,14 @@ class CreateDB:
                 publish_date DATE)
         """
         try:
-            self.__execute_query(query)
+            self._execute_query(query)
         except Exception as e:
             print(f"Произошла ошибка при создании таблиц: {e}")
 
     def save_companies_in_tables(self, companies: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Метод заполняет таблицу с информацией о компаниях"""
         company_id_map = {}
-        with self.__connect_to_db() as conn:
+        with self._connect_to_db() as conn:
             with conn.cursor() as cur:
                 for company in companies:
                     cur.execute(
@@ -93,7 +93,7 @@ class CreateDB:
 
     def save_vacancies_in_tables(self, vacancies: List[List[Dict[str, Any]]], company_id_map: Dict[str, Any]) -> None:
         """Метод заполняет таблицу с информацией о вакансиях"""
-        with self.__connect_to_db() as conn:
+        with self._connect_to_db() as conn:
             with conn.cursor() as cur:
                 for el in vacancies:
                     for vacancy in el:

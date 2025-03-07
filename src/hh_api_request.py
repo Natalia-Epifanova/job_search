@@ -3,6 +3,7 @@ from typing import Any, Dict, List
 import requests
 
 
+
 class HeadHunterAPI:
     """Класс для получения данных по работодателям и вакансиям с hh.ru"""
 
@@ -31,8 +32,8 @@ class HeadHunterAPI:
                     self.vacancies_url = employer["vacancies_url"]
                     return employer["id"]
             else:
-                print(f"Работодатель с названием '{employer_name}' не найден.")
-                return None
+                    print(f"Работодатель с названием '{employer_name}' не найден.")
+                    return None
         else:
             print(f"Ошибка при получении ID работодателя: {response.status_code}")
             return None
@@ -55,34 +56,38 @@ class HeadHunterAPI:
             return None
 
     def get_employer_vacancies(self) -> List[Dict[str, Any]]:
-        """Функция для получения всех вакансий работодателя по его id, с поддержкой пагинации."""
+        """Функция для получения всех вакансий работодателя"""
         vacancies = []
         page = 0
         per_page = 30
-        while page <= 2:
-            response = requests.get(self.vacancies_url, params={"page": page, "per_page": per_page})
-            if response.status_code == 200:
-                data = response.json()
-                vacancies.extend(data.get("items", []))
-                if len(data.get("items", [])) < per_page:
+        try:
+            while page <= 2:
+                response = requests.get(self.vacancies_url, params={"page": page, "per_page": per_page})
+                if response.status_code == 200:
+                    data = response.json()
+                    vacancies.extend(data.get("items", []))
+                    if len(data.get("items", [])) < per_page:
+                        break
+                    page += 1
+                else:
+                    print(f"Ошибка при получении вакансий: {response.status_code}")
                     break
-                page += 1
-            else:
-                print(f"Ошибка при получении вакансий: {response.status_code}")
-                break
-        return vacancies
+            return vacancies
+        except Exception as e:
+            print(f"Произошла ошибка при получении вакансий: {e}")
+            return vacancies
 
     def fetch_vacancies_for_employers(self, employer_names: list) -> List[Dict[str, Any]]:
         """Получает вакансии для списка работодателей по их названиям."""
         for employer_name in employer_names:
             employer_id = self.get_employer_id_by_name(employer_name)
             if employer_id:
-                self.vacancies_list.append(self.get_employer_vacancies())
+                self.vacancies_list.extend(self.get_employer_vacancies())
 
         return self.vacancies_list
 
     def fetch_info_for_employers(self, employer_names: list) -> List[Dict[str, Any]]:
-        """Получает информацию обо всех работодателях из списка по их названиям."""
+        """Получает информацию обо всех работодателях из списка по их названиям"""
         for employer_name in employer_names:
             employer_id = self.get_employer_id_by_name(employer_name)
             if employer_id:
