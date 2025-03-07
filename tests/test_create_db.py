@@ -1,9 +1,9 @@
-import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from src.create_db import CreateDB
 
 
-@patch('src.create_db.psycopg2.connect')
+@patch("src.create_db.psycopg2.connect")
 def test_create_database(mock_connect):
     """Тест на успешное создание базы данных"""
     mock_conn = MagicMock()
@@ -16,7 +16,7 @@ def test_create_database(mock_connect):
     mock_conn.close.assert_called_once()
 
 
-@patch('src.create_db.CreateDB._execute_query')
+@patch("src.create_db.CreateDB._execute_query")
 def test_create_tables_in_the_database(mock_execute_query):
     """Тест на успешное создание таблиц в базе данных"""
     db = CreateDB(database_name="test_db", params={})

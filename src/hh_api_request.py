@@ -3,7 +3,6 @@ from typing import Any, Dict, List
 import requests
 
 
-
 class HeadHunterAPI:
     """Класс для получения данных по работодателям и вакансиям с hh.ru"""
 
@@ -32,8 +31,8 @@ class HeadHunterAPI:
                     self.vacancies_url = employer["vacancies_url"]
                     return employer["id"]
             else:
-                    print(f"Работодатель с названием '{employer_name}' не найден.")
-                    return None
+                print(f"Работодатель с названием '{employer_name}' не найден.")
+                return None
         else:
             print(f"Ошибка при получении ID работодателя: {response.status_code}")
             return None

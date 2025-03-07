@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 from src.hh_api_request import HeadHunterAPI
 
 
@@ -8,10 +9,10 @@ def test_get_employer_id_by_name(mock_get, employers_hh):
     mock_get.return_value.json.return_value = employers_hh
     mock_get.return_value.status_code = 200
     hh_api_test = HeadHunterAPI()
-    emp_id = hh_api_test.get_employer_id_by_name('nails')
+    emp_id = hh_api_test.get_employer_id_by_name("nails")
     mock_get.assert_called_once()
 
-    assert emp_id == '5912899'
+    assert emp_id == "5912899"
 
 
 @patch("src.hh_api_request.requests.get")
@@ -20,7 +21,7 @@ def test_get_employer_id_by_name_no_such_emp(mock_get, employers_hh):
     mock_get.return_value.json.return_value = employers_hh
     mock_get.return_value.status_code = 200
     hh_api_test = HeadHunterAPI()
-    emp_id = hh_api_test.get_employer_id_by_name('Goog')
+    emp_id = hh_api_test.get_employer_id_by_name("Goog")
     mock_get.assert_called_once()
 
     assert emp_id is None
@@ -31,8 +32,9 @@ def test_get_employer_id_by_name_no_response(mock_get):
     """Тест ошибки при запросе по API для get_employer_id_by_name"""
     mock_get.return_value.status_code = 400
     hh_api_test = HeadHunterAPI()
-    emp_id = hh_api_test.get_employer_id_by_name('nails')
+    emp_id = hh_api_test.get_employer_id_by_name("nails")
     assert emp_id is None
+
 
 @patch("src.hh_api_request.requests.get")
 def test_get_employer_info_by_id(mock_get, employer_info_in, employer_info_out):
@@ -44,6 +46,7 @@ def test_get_employer_info_by_id(mock_get, employer_info_in, employer_info_out):
     mock_get.assert_called_once()
     assert emp_info == employer_info_out
 
+
 @patch("src.hh_api_request.requests.get")
 def test_get_employer_info_by_id_no_response(mock_get):
     """Тест ошибки при запросе по API для get_employer_info"""
@@ -52,13 +55,14 @@ def test_get_employer_info_by_id_no_response(mock_get):
     emp_info = hh_api_test.get_employer_info_by_id(1455)
     assert emp_info is None
 
+
 @patch("src.hh_api_request.requests.get")
 def test_get_employer_vacancies(mock_get, two_vacancies_from_hh_in, two_vacancies_from_hh_out, employers_hh):
     """Тест корректного ответа по API подключению для get_employer_vacancies"""
     mock_get.return_value.json.return_value = employers_hh
     mock_get.return_value.status_code = 200
     hh_api_test = HeadHunterAPI()
-    hh_api_test.get_employer_id_by_name('Яндекс')
+    hh_api_test.get_employer_id_by_name("Яндекс")
 
     mock_get.return_value.json.return_value = two_vacancies_from_hh_in
     mock_get.return_value.status_code = 200
@@ -66,18 +70,20 @@ def test_get_employer_vacancies(mock_get, two_vacancies_from_hh_in, two_vacancie
 
     assert vacancies == two_vacancies_from_hh_out
 
+
 @patch("src.hh_api_request.requests.get")
 def test_get_employer_vacancies_no_emp(mock_get, two_vacancies_from_hh_in, two_vacancies_from_hh_out, employers_hh):
     """Тест корректного ответа по API подключению для get_employer_vacancies, когда работодатель отсутствует"""
     mock_get.return_value.json.return_value = employers_hh
     mock_get.return_value.status_code = 200
     hh_api_test = HeadHunterAPI()
-    hh_api_test.get_employer_id_by_name('Goog')
+    hh_api_test.get_employer_id_by_name("Goog")
 
     mock_get.return_value.status_code = 200
     vacancies = hh_api_test.get_employer_vacancies()
 
     assert vacancies == []
+
 
 @patch("src.hh_api_request.requests.get")
 def test_get_employer_vacancies_no_response(mock_get, employers_hh):
@@ -85,21 +91,8 @@ def test_get_employer_vacancies_no_response(mock_get, employers_hh):
     mock_get.return_value.json.return_value = employers_hh
     mock_get.return_value.status_code = 200
     hh_api_test = HeadHunterAPI()
-    hh_api_test.get_employer_id_by_name('Яндекс')
+    hh_api_test.get_employer_id_by_name("Яндекс")
 
     mock_get.return_value.status_code = 400
     vacancies = hh_api_test.get_employer_vacancies()
     assert vacancies == []
-
-
-# @patch("src.hh_api_request.requests.get")
-# def test_fetch_vacancies_for_employers(mock_get, two_employers_vacancies_in, two_employers_vacancies_out, employers_hh_2):
-#     mock_get.return_value.json.return_value = employers_hh_2
-#     mock_get.return_value.status_code = 200
-#     hh_api_test = HeadHunterAPI()
-#     hh_api_test.get_employer_id_by_name('VK')
-#     hh_api_test.get_employer_id_by_name('HeadHunter')
-#     mock_get.return_value.json.return_value = two_employers_vacancies_in
-#     emp_vacs = hh_api_test.fetch_vacancies_for_employers(['VK', 'HeadHunter'])
-#     assert emp_vacs == two_employers_vacancies_out
-

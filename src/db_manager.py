@@ -43,11 +43,11 @@ class DBManager:
         """Метод для получения списка всех вакансий с указанием названия компании,
         названия вакансии, зарплаты и ссылки на вакансию"""
         query = """
-            SELECT companies.company_name, vacancies.vacancy_name, 
-               CASE 
-                   WHEN vacancies.salary = 0 THEN 'Зарплата не указана' 
-                   ELSE CAST(vacancies.salary AS TEXT) 
-               END AS salary, 
+            SELECT companies.company_name, vacancies.vacancy_name,
+               CASE
+                   WHEN vacancies.salary = 0 THEN 'Зарплата не указана'
+                   ELSE CAST(vacancies.salary AS TEXT)
+               END AS salary,
                vacancies.description_url_hh
             FROM vacancies
             INNER JOIN companies USING(company_id);

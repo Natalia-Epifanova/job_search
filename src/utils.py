@@ -40,4 +40,3 @@ def address_description(vacancy: dict) -> str:
         if full_address is not None:
             address_str = full_address
     return address_str
-
