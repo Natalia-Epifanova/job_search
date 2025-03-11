@@ -1,16 +1,27 @@
-from src.utils import address_description, city_description, metro_description, type_of_salary
+from src.utils import address_description, city_description, metro_description, type_of_salary_from, type_of_salary_to
 
 
-def test_type_of_salary_zero(vacancy_for_test_1):
+def test_type_of_salary_from_zero(vacancy_for_test_1):
     """Тест на возврат нуля, когда зп не указана"""
-    result = type_of_salary(vacancy_for_test_1)
+    result = type_of_salary_from(vacancy_for_test_1)
     assert result == 0
 
 
-def test_type_of_salary_int(vacancy_for_test_2):
+def test_type_of_salary_from_int(vacancy_for_test_2):
     """Тест на корректный возврат зп"""
-    result = type_of_salary(vacancy_for_test_2)
+    result = type_of_salary_from(vacancy_for_test_2)
     assert result == 100000
+
+def test_type_of_salary_to_zero(vacancy_for_test_1):
+    """Тест на возврат нуля, когда зп не указана"""
+    result = type_of_salary_to(vacancy_for_test_1)
+    assert result == 0
+
+
+def test_type_of_salary_to_int(vacancy_for_test_2):
+    """Тест на корректный возврат зп"""
+    result = type_of_salary_to(vacancy_for_test_2)
+    assert result == 120000
 
 
 def test_metro_description_none(vacancy_for_test_1):

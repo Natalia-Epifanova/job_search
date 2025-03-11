@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 
 import psycopg2
 
-from src.utils import address_description, city_description, metro_description, type_of_salary
+from src.utils import address_description, city_description, metro_description, type_of_salary_from, type_of_salary_to
 
 
 class CreateDB:
@@ -55,7 +55,8 @@ class CreateDB:
                 vacancy_id SERIAL PRIMARY KEY,
                 company_id INT REFERENCES companies(company_id),
                 vacancy_name VARCHAR(255) NOT NULL,
-                salary INT,
+                salary_from INT,
+                salary_to INT,
                 city VARCHAR(50),
                 metro_station VARCHAR(50),
                 address VARCHAR(255),
@@ -95,21 +96,22 @@ class CreateDB:
         """Метод заполняет таблицу с информацией о вакансиях"""
         with self._connect_to_db() as conn:
             with conn.cursor() as cur:
-                for el in vacancies:
-                    for vacancy in el:
+
+                    for vacancy in vacancies:
                         company_name = vacancy["employer"]["name"]
                         company_id = company_id_map.get(company_name)
                         if company_id is not None:
                             cur.execute(
                                 """
-                                INSERT INTO vacancies (company_id, vacancy_name, salary, city, metro_station,
+                                INSERT INTO vacancies (company_id, vacancy_name, salary_from, salary_to, city, metro_station,
                                 address, description_url_hh, publish_date)
-                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                                 """,
                                 (
                                     company_id,
                                     vacancy["name"],
-                                    type_of_salary(vacancy),
+                                    type_of_salary_from(vacancy),
+                                    type_of_salary_to(vacancy),
                                     city_description(vacancy),
                                     metro_description(vacancy),
                                     address_description(vacancy),

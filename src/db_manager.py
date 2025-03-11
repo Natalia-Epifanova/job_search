@@ -45,9 +45,13 @@ class DBManager:
         query = """
             SELECT companies.company_name, vacancies.vacancy_name,
                CASE
-                   WHEN vacancies.salary = 0 THEN 'Зарплата не указана'
-                   ELSE CAST(vacancies.salary AS TEXT)
-               END AS salary,
+                   WHEN vacancies.salary_from = 0 THEN 'Не указано'
+                   ELSE CAST(vacancies.salary_from AS TEXT)
+               END AS salary_from,
+               CASE
+                   WHEN vacancies.salary_to = 0 THEN 'Не указано'
+                   ELSE CAST(vacancies.salary_to AS TEXT)
+               END AS salary_to,
                vacancies.description_url_hh
             FROM vacancies
             INNER JOIN companies USING(company_id);
@@ -59,9 +63,9 @@ class DBManager:
     def get_avg_salary(self) -> None:
         """Метод для получения средней зарплаты по вакансиям"""
         query = """
-            SELECT AVG(salary)
+            SELECT AVG(salary_from)
             FROM vacancies
-            WHERE salary > 0;
+            WHERE salary_from > 0;
         """
         rows = self.__execute_query(query)
         for row in rows:
@@ -70,28 +74,47 @@ class DBManager:
     def get_vacancies_with_higher_salary(self) -> None:
         """Метод для получения списка всех вакансий, у которых зарплата выше средней по всем вакансиям"""
         query = """
-            SELECT companies.company_name, vacancies.vacancy_name, vacancies.salary, vacancies.description_url_hh
+            SELECT companies.company_name, vacancies.vacancy_name, 
+                CASE
+                   WHEN vacancies.salary_from = 0 THEN 'Не указано'
+                   ELSE CAST(vacancies.salary_from AS TEXT)
+                END AS salary_from,
+                CASE
+                   WHEN vacancies.salary_to = 0 THEN 'Не указано'
+                   ELSE CAST(vacancies.salary_to AS TEXT)
+                END AS salary_to,
+                vacancies.description_url_hh
             FROM vacancies
             INNER JOIN companies USING(company_id)
-            WHERE vacancies.salary > (SELECT AVG(salary) FROM vacancies WHERE salary > 0);
+            WHERE (vacancies.salary_from > (SELECT AVG(salary_from) FROM vacancies WHERE salary_from > 0) 
+            OR vacancies.salary_to > (SELECT AVG(salary_from) FROM vacancies WHERE salary_from > 0));
         """
         rows = self.__execute_query(query)
         for row in rows:
             print(row)
 
+
     def get_vacancies_with_keyword(self, keywords: str) -> None:
         """Метод для получения списка всех вакансий, в названии которых содержатся переданные в метод слова"""
-        # Преобразуем ключевые слова в паттерн для регулярного выражения
-        keywords_list = keywords.split()  # Разбиваем по пробелам
-        pattern = "|".join(map(re.escape, keywords_list))  # Создаем паттерн, экранируя специальные символы
+        keywords_list = keywords.split()
+        like_conditions = " OR ".join([f"vacancies.vacancy_name ILIKE %s" for _ in keywords_list])
 
-        query = """
-            SELECT companies.company_name, vacancies.vacancy_name, vacancies.salary, vacancies.description_url_hh
+        query = f"""
+            SELECT companies.company_name, vacancies.vacancy_name, 
+                CASE
+                   WHEN vacancies.salary_from = 0 THEN 'Не указано'
+                   ELSE CAST(vacancies.salary_from AS TEXT)
+                END AS salary_from,
+                CASE
+                   WHEN vacancies.salary_to = 0 THEN 'Не указано'
+                   ELSE CAST(vacancies.salary_to AS TEXT)
+                END AS salary_to,
+                vacancies.description_url_hh
             FROM vacancies
             INNER JOIN companies USING(company_id)
-            WHERE vacancies.vacancy_name ~* %s;  -- используем регулярное выражение в SQL
+            WHERE {like_conditions};
         """
-
-        rows = self.__execute_query(query, (pattern,))  # Передаем паттерн как параметр
+        params = tuple(f"%{keyword}%" for keyword in keywords_list)
+        rows = self.__execute_query(query, params)
         for row in rows:
             print(row)

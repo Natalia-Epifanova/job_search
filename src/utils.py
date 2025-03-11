@@ -1,11 +1,22 @@
-def type_of_salary(vacancy: dict) -> int:
-    """Функция, преобразующая зарплату в нужный вид"""
+def type_of_salary_from(vacancy: dict) -> int:
+    """Функция, преобразующая зарплату "от" в нужный вид"""
     salary_res = 0
     salary = vacancy.get("salary")
     if isinstance(salary, dict):
         salary_from = salary.get("from")
         if salary_from is not None:
             salary_res = salary_from
+    return salary_res
+
+
+def type_of_salary_to(vacancy: dict) -> int:
+    """Функция, преобразующая зарплату "до" в нужный вид"""
+    salary_res = 0
+    salary = vacancy.get("salary")
+    if isinstance(salary, dict):
+        salary_to = salary.get("to")
+        if salary_to is not None:
+            salary_res = salary_to
     return salary_res
 
 
