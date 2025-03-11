@@ -1,4 +1,3 @@
-import re
 from contextlib import closing
 from typing import Any
 
@@ -74,7 +73,7 @@ class DBManager:
     def get_vacancies_with_higher_salary(self) -> None:
         """Метод для получения списка всех вакансий, у которых зарплата выше средней по всем вакансиям"""
         query = """
-            SELECT companies.company_name, vacancies.vacancy_name, 
+            SELECT companies.company_name, vacancies.vacancy_name,
                 CASE
                    WHEN vacancies.salary_from = 0 THEN 'Не указано'
                    ELSE CAST(vacancies.salary_from AS TEXT)
@@ -86,13 +85,12 @@ class DBManager:
                 vacancies.description_url_hh
             FROM vacancies
             INNER JOIN companies USING(company_id)
-            WHERE (vacancies.salary_from > (SELECT AVG(salary_from) FROM vacancies WHERE salary_from > 0) 
+            WHERE (vacancies.salary_from > (SELECT AVG(salary_from) FROM vacancies WHERE salary_from > 0)
             OR vacancies.salary_to > (SELECT AVG(salary_from) FROM vacancies WHERE salary_from > 0));
         """
         rows = self.__execute_query(query)
         for row in rows:
             print(row)
-
 
     def get_vacancies_with_keyword(self, keywords: str) -> None:
         """Метод для получения списка всех вакансий, в названии которых содержатся переданные в метод слова"""
@@ -100,7 +98,7 @@ class DBManager:
         like_conditions = " OR ".join([f"vacancies.vacancy_name ILIKE %s" for _ in keywords_list])
 
         query = f"""
-            SELECT companies.company_name, vacancies.vacancy_name, 
+            SELECT companies.company_name, vacancies.vacancy_name,
                 CASE
                    WHEN vacancies.salary_from = 0 THEN 'Не указано'
                    ELSE CAST(vacancies.salary_from AS TEXT)

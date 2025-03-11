@@ -12,6 +12,7 @@ def test_type_of_salary_from_int(vacancy_for_test_2):
     result = type_of_salary_from(vacancy_for_test_2)
     assert result == 100000
 
+
 def test_type_of_salary_to_zero(vacancy_for_test_1):
     """Тест на возврат нуля, когда зп не указана"""
     result = type_of_salary_to(vacancy_for_test_1)

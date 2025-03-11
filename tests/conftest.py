@@ -29,10 +29,7 @@ def vacancy_for_test_2():
         "id": "117843032",
         "name": "Бизнес-партнёр в Финансовую службу",
         "area": {"id": "1", "name": "Москва", "url": "https://api.hh.ru/areas/1"},
-        "salary": {
-            "from": 100000,
-            "to": 120000
-        },
+        "salary": {"from": 100000, "to": 120000},
         "address": {
             "city": "Москва",
             "metro": {

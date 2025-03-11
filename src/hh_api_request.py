@@ -25,7 +25,7 @@ class HeadHunterAPI:
         params = {"text": employer_name}
         response = requests.get(url, params=params)
         if response.status_code == 200:
-            response.encoding = 'utf-8'
+            response.encoding = "utf-8"
             employers = response.json().get("items", [])
             for employer in employers:
                 if employer["name"].lower() == employer_name.lower():
@@ -42,7 +42,7 @@ class HeadHunterAPI:
         """Функция для получения информации о работодателе по id"""
         response = requests.get(f"{self.base_url}/employers/{employer_id}")
         if response.status_code == 200:
-            response.encoding = 'utf-8'
+            response.encoding = "utf-8"
             employer = response.json()
             employer_info = {
                 "name": employer["name"],
@@ -65,7 +65,7 @@ class HeadHunterAPI:
             while page <= 2:
                 response = requests.get(self.vacancies_url, params={"page": page, "per_page": per_page})
                 if response.status_code == 200:
-                    response.encoding = 'utf-8'
+                    response.encoding = "utf-8"
                     data = response.json()
                     vacancies.extend(data.get("items", []))
                     if len(data.get("items", [])) < per_page:

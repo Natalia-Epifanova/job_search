@@ -92,30 +92,29 @@ class CreateDB:
                     company_id_map[company["name"]] = company_id
         return company_id_map
 
-    def save_vacancies_in_tables(self, vacancies: List[List[Dict[str, Any]]], company_id_map: Dict[str, Any]) -> None:
+    def save_vacancies_in_tables(self, vacancies: List[Dict[str, Any]], company_id_map: Dict[str, Any]) -> None:
         """Метод заполняет таблицу с информацией о вакансиях"""
         with self._connect_to_db() as conn:
             with conn.cursor() as cur:
-
-                    for vacancy in vacancies:
-                        company_name = vacancy["employer"]["name"]
-                        company_id = company_id_map.get(company_name)
-                        if company_id is not None:
-                            cur.execute(
-                                """
-                                INSERT INTO vacancies (company_id, vacancy_name, salary_from, salary_to, city, metro_station,
-                                address, description_url_hh, publish_date)
+                for vacancy in vacancies:
+                    company_name = vacancy["employer"]["name"]
+                    company_id = company_id_map.get(company_name)
+                    if company_id is not None:
+                        cur.execute(
+                            """
+                                INSERT INTO vacancies (company_id, vacancy_name, salary_from, salary_to,
+                                city, metro_station, address, description_url_hh, publish_date)
                                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                                 """,
-                                (
-                                    company_id,
-                                    vacancy["name"],
-                                    type_of_salary_from(vacancy),
-                                    type_of_salary_to(vacancy),
-                                    city_description(vacancy),
-                                    metro_description(vacancy),
-                                    address_description(vacancy),
-                                    vacancy["alternate_url"],
-                                    vacancy["published_at"],
-                                ),
-                            )
+                            (
+                                company_id,
+                                vacancy["name"],
+                                type_of_salary_from(vacancy),
+                                type_of_salary_to(vacancy),
+                                city_description(vacancy),
+                                metro_description(vacancy),
+                                address_description(vacancy),
+                                vacancy["alternate_url"],
+                                vacancy["published_at"],
+                            ),
+                        )
