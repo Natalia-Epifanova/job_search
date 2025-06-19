@@ -1,0 +1,120 @@
+from contextlib import closing
+from typing import Any, Dict, List
+
+import psycopg2
+
+from src.utils import address_description, city_description, metro_description, type_of_salary_from, type_of_salary_to
+
+
+class CreateDB:
+    """Класс для создания и заполнения базы данных"""
+
+    database_name: str
+    params: dict
+
+    def __init__(self, database_name: str, params: dict) -> None:
+        """Инициализация класса"""
+        self.database_name = database_name
+        self.params = params
+
+    def _connect_to_db(self) -> Any:
+        """Создает соединение с базой данных. Возвращает объект соединения."""
+        return psycopg2.connect(dbname=self.database_name, **self.params)
+
+    def _execute_query(self, query: str, params=None) -> None:
+        """Общий метод для выполнения SQL-запроса"""
+        with closing(self._connect_to_db()) as conn:
+            with conn.cursor() as cur:
+                cur.execute(query, params)
+                conn.commit()
+
+    def create_database(self) -> None:
+        """Метод для создания базы данных"""
+        conn = psycopg2.connect(dbname="postgres", **self.params)
+        conn.autocommit = True
+        try:
+            with conn.cursor() as cur:
+                cur.execute(f"DROP DATABASE IF EXISTS {self.database_name}")
+                cur.execute(f"CREATE DATABASE {self.database_name}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        finally:
+            conn.close()
+
+    def create_tables_in_the_database(self) -> None:
+        """Метод для создания таблиц в базе данных"""
+        query = """
+            CREATE TABLE IF NOT EXISTS companies (
+                company_id SERIAL PRIMARY KEY,
+                company_name VARCHAR(50) NOT NULL UNIQUE,
+                id_hh INT NOT NULL,
+                description_url_hh TEXT,
+                site_url TEXT,
+                vacancies_url TEXT);
+            CREATE TABLE IF NOT EXISTS vacancies (
+                vacancy_id SERIAL PRIMARY KEY,
+                company_id INT REFERENCES companies(company_id),
+                vacancy_name VARCHAR(255) NOT NULL,
+                salary_from INT,
+                salary_to INT,
+                city VARCHAR(50),
+                metro_station VARCHAR(50),
+                address VARCHAR(255),
+                description_url_hh TEXT,
+                publish_date DATE)
+        """
+        try:
+            self._execute_query(query)
+        except Exception as e:
+            print(f"Произошла ошибка при создании таблиц: {e}")
+
+    def save_companies_in_tables(self, companies: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Метод заполняет таблицу с информацией о компаниях"""
+        company_id_map = {}
+        with self._connect_to_db() as conn:
+            with conn.cursor() as cur:
+                for company in companies:
+                    cur.execute(
+                        """
+                        INSERT INTO companies (company_name, id_hh, description_url_hh, site_url, vacancies_url)
+                        VALUES (%s, %s, %s, %s, %s)
+                        RETURNING company_id
+                        """,
+                        (
+                            company["name"],
+                            company["id"],
+                            company["description_url"],
+                            company["site_url"],
+                            company["vacancies_url"],
+                        ),
+                    )
+                    company_id = cur.fetchone()[0]
+                    company_id_map[company["name"]] = company_id
+        return company_id_map
+
+    def save_vacancies_in_tables(self, vacancies: List[Dict[str, Any]], company_id_map: Dict[str, Any]) -> None:
+        """Метод заполняет таблицу с информацией о вакансиях"""
+        with self._connect_to_db() as conn:
+            with conn.cursor() as cur:
+                for vacancy in vacancies:
+                    company_name = vacancy["employer"]["name"]
+                    company_id = company_id_map.get(company_name)
+                    if company_id is not None:
+                        cur.execute(
+                            """
+                                INSERT INTO vacancies (company_id, vacancy_name, salary_from, salary_to,
+                                city, metro_station, address, description_url_hh, publish_date)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                """,
+                            (
+                                company_id,
+                                vacancy["name"],
+                                type_of_salary_from(vacancy),
+                                type_of_salary_to(vacancy),
+                                city_description(vacancy),
+                                metro_description(vacancy),
+                                address_description(vacancy),
+                                vacancy["alternate_url"],
+                                vacancy["published_at"],
+                            ),
+                        )
