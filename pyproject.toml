@@ -6,7 +6,8 @@ authors = ["natalia-yep_msi <epif97@mail.ru>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.11.9"
+psycopg2 = "^2.9.10"
 
 
 [tool.poetry.group.dev.dependencies]
